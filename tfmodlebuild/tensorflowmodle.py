@@ -3,10 +3,13 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
-
+# Sequential Modle Architecture 
 from tensorflow.keras.models import Sequential
+#Layers used in the CNN
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
+# Evaluation Metrixes 
 from tensorflow.keras.metrics import Precision, Recall, CategoricalAccuracy
+#To load a saved modle 
 from tensorflow.keras.models import load_model
 from tensorflow.keras.utils import to_categorical
 import imghdr
@@ -14,7 +17,7 @@ import imghdr
 # Ensure TensorFlow doesn't overuse GPU memory
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
+    tf.config.experimental.set_memory_growth(gpu, True) #allows memory to grow as needed 
 
 # Load dataset from directory
 data = tf.keras.utils.image_dataset_from_directory('C:\\Users\\Indrajit\\PycharmProjects\\pythonProject1\\data')
@@ -24,11 +27,11 @@ batch = data_iterator.next()
 # Visualize a batch of images and labels
 fig, ax = plt.subplots(ncols=4, figsize=(20, 20))
 for idx, img in enumerate(batch[0][:4]):
-    ax[idx].imshow(img.astype(int))
+    ax[idx].imshow(img.astype(int)) #images are floar32 by default
     ax[idx].title.set_text(batch[1][idx])
 
 # Scale data
-data = data.map(lambda x, y: (x / 255, y))
+data = data.map(lambda x, y: (x / 255, y)) # Scale Pixles from [0,255] to [0,1]
 
 # Determine dataset sizes
 train_size = int(len(data) * 0.7)
@@ -42,7 +45,7 @@ test = data.skip(train_size + val_size).take(test_size)
 
 # Define the model
 model = Sequential([
-    Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(256, 256, 3)),
+    Conv2D(16, (3, 3), activation='relu', padding='same', input_shape=(256, 256, 3)), # extracts features like edges corners textures from the 2d input image
     MaxPooling2D(pool_size=(2, 2)),
     Conv2D(32, (3, 3), activation='relu', padding='same'),
     MaxPooling2D(pool_size=(2, 2)),
@@ -50,12 +53,12 @@ model = Sequential([
     MaxPooling2D(pool_size=(2, 2)),
     Conv2D(128, (3, 3), activation='relu', padding='same'),
     MaxPooling2D(pool_size=(2, 2)),
-    Flatten(),
+    Flatten(),# convers 2d features to 1D 
     Dense(256, activation='relu'),
-    Dropout(0.5),
+    Dropout(0.5), # prevents overfitting 
     Dense(128, activation='relu'),
     Dropout(0.5),
-    Dense(5, activation='softmax')
+    Dense(5, activation='softmax') # for multi-class classification 
 ])
 
 # Compile the model
